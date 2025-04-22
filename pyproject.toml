@@ -1,0 +1,21 @@
+[project]
+name = "statistikbolaget"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "fastapi>=0.115.12",
+    "openai>=1.75.0",
+    "pandas>=2.2.3",
+    "uvicorn>=0.34.2",
+]
+
+[project.scripts]
+server = "uvicorn main:app"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.6",
+]

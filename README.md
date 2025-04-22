@@ -1,11 +1,18 @@
 # statistikbolaget
 
+## Krav
 Behöver data från systembolaget
 Kör via script.py för att skapa en databas
 
-Använd python -m sqlite3 forsaljning.db för att interagera.
+## Kör
+uv run uvicorn main:app
+
+Linting: uv run ruff check
+
+Använd uv run python -m sqlite3 forsaljning.db för att interagera.
 
 TODO:
+- in progress status
 - tabell över sökningar + resultat
 - använd cache från sökningar
 - info om systembolagets data och mig själv
@@ -13,7 +20,6 @@ TODO:
 - automatiserad uppladdning
 - Generera om frågan
 - publish
-- license och annat relaterat
 
 Framtid:
 - inkludera data från tidigare år
