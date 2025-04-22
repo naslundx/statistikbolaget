@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="sv">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Statistikbolaget</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="/static/style.css" />
+    </head>
+    <body
+        class="bg-gray-50 text-gray-800 min-h-screen flex flex-col items-center p-6"
+    >
+        <h1 class="text-3xl font-bold mb-6">🧠 Statistikbolaget</h1>
+
+        <div class="w-full max-w-2xl">
+            <form id="queryForm" class="flex gap-2 mb-4">
+                <input
+                    id="questionInput"
+                    type="text"
+                    maxlength="100"
+                    placeholder="Ex: Hur många röda viner från Sverige är ekologiska?"
+                    class="flex-1 p-2 border rounded-lg"
+                    required
+                />
+                <button
+                    type="submit"
+                    id="submitButton"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                >
+                    Skicka
+                </button>
+            </form>
+
+            <div id="history" class="space-y-6"></div>
+        </div>
+
+        <script src="/static/script.js"></script>
+    </body>
+</html>
