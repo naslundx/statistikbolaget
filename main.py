@@ -21,8 +21,10 @@ async def index():
     with open("templates/index.html", encoding="utf-8") as f:
         return f.read()
 
+
 class UserQuery(BaseModel):
     question: str
+
 
 def send_to_openai(prompt) -> str:
     response = client.chat.completions.create(
@@ -112,6 +114,9 @@ Tänk på att kolumnen namn finns i flera tabeller!
 Använd hellre LIKE och procenttecken än exakt strängmatchning.
 Sök om möjligt helst på varugrupp och i andra hand även varugrupp_detalj.
 Sök bara på innehåll i varans namn om inget annat går eller användaren explicit ber om det.
+All data är från år 2024.
+Du får bara generera SELECT-kommandon och returnera endast SQL.
+Om du inte förstår, returnera "Förstår ej."
 
 Fråga: "{natural_question}"
 SQL:

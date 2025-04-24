@@ -12,15 +12,16 @@ Linting: uv run ruff check
 Använd uv run python -m sqlite3 forsaljning.db för att interagera.
 
 TODO:
-- in progress status
-- tabell över sökningar + resultat
-- använd cache från sökningar
-- info om systembolagets data och mig själv
-- max limit på data?
-- automatiserad uppladdning
-- Generera om frågan
-- publish
+- Fixa buggar med history rendering
+- Designa history + error bars
+- Max limit på data
+- Formatera output/tabeller bättre
+- Möjlighet att generera om frågan
+- Kontrollera select query + readonly user
+- Tabell över sökningar + resultat
+- Publicera
 
 Framtid:
-- inkludera data från tidigare år
+- Använd cache per query?
+- Inkludera data från tidigare år
 - Upvote/Downvote på resultatet
