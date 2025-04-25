@@ -15,7 +15,6 @@ TODO:
 - Designa history + error bars
 - Max limit på data
 - Formatera output/tabeller bättre
-- Möjlighet att generera om frågan
 - Kontrollera select query + readonly user
 - Tabell över sökningar + resultat
 - Publicera

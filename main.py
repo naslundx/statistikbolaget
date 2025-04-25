@@ -40,6 +40,16 @@ def send_to_openai(prompt) -> str:
     raw_data = response.choices[0].message.content.strip()
     return raw_data
 
+def extract_sql(raw_response: str) -> str:
+    start_index = raw_response.find("SELECT ");
+    if start_index < 0:
+        return ""
+    end_index = raw_response.find(";", start_index + 1) + 1
+    if end_index < 0:
+        return ""
+
+    return raw_response[start_index:end_index]
+
 def format_response(natural_question, answer) -> str:
     prompt = f"""
 En användare har ställt frågan:
@@ -124,30 +134,37 @@ Fråga: "{natural_question}"
 SQL:
 """
     raw_data = send_to_openai(prompt)
-    return raw_data.split(';')[0].replace('sql', '').replace('`', '')
+    return extract_sql(raw_data)
 
-@app.post("/query")
-async def query_api(data: UserQuery):
-    question = data.question[:100]
-    sql = generate_sql(question)
-
-    error_msg = ""
-    result = ""
-    raw_result = ""
+def run_sql_query(sql: str):
+    if not sql or 'SELECT' not in sql:
+        return False, ""
 
     try:
         conn = sqlite3.connect(DB_PATH)
         df = pd.read_sql_query(sql, conn)
         conn.close()
         raw_result = df.to_html(index=False)
-        result = format_response(question, raw_result)
-    except Exception as e:
-        error_msg = str(e)
+        return True, raw_result
 
-    return JSONResponse(content={
+    except Exception as e:
+        return False, str(e)
+
+@app.post("/query")
+async def query_api(data: UserQuery):
+    question = data.question[:100]
+    sql = generate_sql(question)
+    success, raw_result = run_sql_query(sql)
+
+    content = {
         "question": data.question,
         "sql": sql,
-        "result": result,
         "raw_result": raw_result,
-        "error_msg": error_msg,
-    })
+        "success": success
+    }
+
+    if success:
+        result = format_response(question, raw_result)
+        content["result"] = result
+
+    return JSONResponse(content=content)

@@ -13,7 +13,9 @@ renderExistingHistory();
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const question = input.value.trim();
-  if (!question) return;
+  if (!question) {
+    return;
+  }
 
   submitBtn.classList.add("opacity-50", "cursor-not-allowed");
   addHistoryLoader();
@@ -32,7 +34,7 @@ form.addEventListener("submit", async (e) => {
   input.value = "";
 
   removeHistoryLoader();
-  renderHistoryItem(history[history.length - 1]);
+  renderHistoryItem(result);
 
   submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
 });
@@ -60,15 +62,17 @@ function renderHistoryItem(entry) {
   const container = document.createElement("div");
   container.className = "bg-white shadow p-4 m-4 rounded-lg";
 
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "✖";
-  removeBtn.className = "ml-2 text-red-500 hover:text-red-700 text-sm";
-  removeBtn.onclick = () => removeEntry(entry.id);
-
   const question = document.createElement("a");
   question.className = "font-semibold mb-2";
   question.textContent = `${entry.question}`;
   question.onclick = () => populateEntry(entry.id);
+  container.appendChild(question);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "✖";
+  removeBtn.className = "ml-2 text-red-500 hover:text-red-700 text-sm";
+  removeBtn.onclick = () => removeEntry(entry.id);
+  container.appendChild(removeBtn);
 
   const sqlButton = document.createElement("button");
   sqlButton.className = "collapsible bg-gray-200 hover:bg-gray-300";
@@ -77,20 +81,12 @@ function renderHistoryItem(entry) {
   sql.className = "content bg-gray-100 p-2 rounded text-sm overflow-wrap";
   sql.textContent = entry.sql.trim();
 
-  let errorButton = null;
-  let error = null;
-  if (entry.error_msg) {
-    errorButton = document.createElement("button");
-    errorButton.className = "collapsible bg-red-200 hover:bg-red-300";
-    errorButton.textContent = "Error";
-    error = document.createElement("div");
-    error.className = "content bg-red-100 p-2 rounded text-sm overflow-wrap";
-    error.textContent = entry.error_msg;
+  if (entry.success) {
+    const result = document.createElement("div");
+    result.className = "wrap-break-word mb-10";
+    result.innerHTML = entry.result;
+    container.appendChild(result);
   }
-
-  const result = document.createElement("div");
-  result.className = "wrap-break-word mb-10";
-  result.innerHTML = entry.result;
 
   const rawResultButton = document.createElement("button");
   rawResultButton.className = "collapsible bg-gray-200 hover:bg-gray-300";
@@ -98,19 +94,13 @@ function renderHistoryItem(entry) {
   const rawResult = document.createElement("div");
   rawResult.className = "content wrap-break-word";
   rawResult.innerHTML = entry.raw_result;
+  container.appendChild(rawResultButton);
+  container.appendChild(rawResult);
 
-  container.appendChild(question);
-  container.appendChild(removeBtn);
-
-  if (errorButton) {
-    container.appendChild(errorButton);
-    container.appendChild(error);
-  } else {
-    container.appendChild(result);
-    container.appendChild(rawResultButton);
-    container.appendChild(rawResult);
-    container.appendChild(sqlButton);
-    container.appendChild(sql);
+  if (!entry.success) {
+    rawResultButton.className = "collapsible bg-red-200 hover:bg-red-300";
+    rawResult.className =
+      "content bg-red-100 p-2 rounded text-sm overflow-wrap";
   }
 
   historyDiv.insertBefore(container, historyDiv.firstChild);
