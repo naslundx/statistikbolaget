@@ -48,7 +48,9 @@ En användare har ställt frågan:
 Och ett datorsystem har genererat svaret:
     {answer}
 
-Omformulera svaret så att det blir mer människovänligt. Ändra inga detaljer, men avrunda siffror eller formatera där det behövs.
+Omformulera svaret så att det blir mer människovänligt.
+Ändra inga detaljer, men avrunda siffror eller formatera där det behövs.
+Inkludera enheter på siffror.
 
 Svar till användaren:
 """

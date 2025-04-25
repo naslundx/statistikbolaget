@@ -6,6 +6,7 @@ const clearAllButtonContainer = document.getElementById(
   "clearAllButtonContainer",
 );
 
+var idCounter = 0;
 let history = JSON.parse(localStorage.getItem("chatHistory") || "[]");
 renderExistingHistory();
 
@@ -24,19 +25,24 @@ form.addEventListener("submit", async (e) => {
   });
 
   const result = await raw_result.json();
+  result.id = idCounter++;
   console.log(result);
   history.push(result);
-  localStorage.setItem("chatHistory", JSON.stringify(history));
+  saveHistoryToLocalStorage();
   input.value = "";
 
   removeHistoryLoader();
-  renderHistoryItem(history.length - 1);
+  renderHistoryItem(history[history.length - 1]);
 
   submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
 });
 
 function removeHistoryLoader() {
   document.querySelectorAll(".history-temp").forEach((e) => e.remove());
+}
+
+function saveHistoryToLocalStorage() {
+  localStorage.setItem("chatHistory", JSON.stringify(history));
 }
 
 function addHistoryLoader() {
@@ -50,22 +56,19 @@ function addHistoryLoader() {
   historyDiv.insertBefore(container, historyDiv.firstChild);
 }
 
-function renderHistoryItem(index) {
-  const entry = history[index];
-
-  const originalIndex = history.length - 1 - index;
+function renderHistoryItem(entry) {
   const container = document.createElement("div");
   container.className = "bg-white shadow p-4 m-4 rounded-lg";
 
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "✖";
   removeBtn.className = "ml-2 text-red-500 hover:text-red-700 text-sm";
-  removeBtn.onclick = () => removeEntry(originalIndex);
+  removeBtn.onclick = () => removeEntry(entry.id);
 
   const question = document.createElement("a");
   question.className = "font-semibold mb-2";
   question.textContent = `${entry.question}`;
-  question.onclick = () => populateEntry(originalIndex);
+  question.onclick = () => populateEntry(entry.id);
 
   const sqlButton = document.createElement("button");
   sqlButton.className = "collapsible bg-gray-200 hover:bg-gray-300";
@@ -112,45 +115,62 @@ function renderHistoryItem(index) {
 
   historyDiv.insertBefore(container, historyDiv.firstChild);
 
-  console.log("wtf");
   clearAllButtonContainer.classList.remove("hidden");
+  setCollapsibleCallbacks();
 }
 
 function renderExistingHistory() {
   historyDiv.innerHTML = "";
-  for (let index = history.length - 1; index >= 0; index--) {
-    renderHistoryItem(index);
-  }
+  let largestId = 0;
+  history.forEach((e) => {
+    renderHistoryItem(e);
+    largestId = Math.max(largestId, e.id);
+  });
+  idCounter = largestId + 1;
   setCollapsibleCallbacks();
 }
 
-function removeEntry(index) {
+function removeEntry(id) {
+  const index = history.findIndex((e) => e.id == id);
+  if (index < 0) {
+    return;
+  }
+
   history.splice(index, 1);
-  historyDiv.children[index].remove();
+  historyDiv.children[historyDiv.children.length - index - 1].remove();
+
+  if (history.length === 0) {
+    clearAllButtonContainer.classList.add("hidden");
+  }
+  saveHistoryToLocalStorage();
 }
 
-function populateEntry(index) {
+function populateEntry(id) {
+  const index = history.findIndex((e) => e.id == id);
   input.value = history[index].question;
 }
 
 function setCollapsibleCallbacks() {
-  var coll = document.getElementsByClassName("collapsible");
-  for (let i = 0; i < coll.length; i++) {
-    coll[i].addEventListener("click", function () {
-      this.classList.toggle("active");
-      var content = this.nextElementSibling;
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
+  Array.from(document.getElementsByClassName("collapsible"))
+    .filter((e) => !e.classList.contains("has-event-listener"))
+    .forEach((e) => {
+      e.classList.add("has-event-listener");
+
+      e.addEventListener("click", function () {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
     });
-  }
 }
 
 function clearAllHistory() {
   localStorage.setItem("chatHistory", []);
   history = [];
-  renderAllHistory();
+  renderExistingHistory();
   clearAllButtonContainer.classList.add("hidden");
 }

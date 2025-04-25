@@ -12,7 +12,6 @@ Linting: uv run ruff check
 Använd uv run python -m sqlite3 forsaljning.db för att interagera.
 
 TODO:
-- Fixa buggar med history rendering
 - Designa history + error bars
 - Max limit på data
 - Formatera output/tabeller bättre
