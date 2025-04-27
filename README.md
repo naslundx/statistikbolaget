@@ -17,7 +17,6 @@ TODO:
 - Formatera output/tabeller bättre
 - Readonly db user
 - Tabell över sökningar + resultat
-- Publicera
 
 Framtid:
 - Använd cache per query?
