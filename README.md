@@ -15,7 +15,7 @@ TODO:
 - Designa history + error bars
 - Max limit på data
 - Formatera output/tabeller bättre
-- Kontrollera select query + readonly user
+- Readonly db user
 - Tabell över sökningar + resultat
 - Publicera
 

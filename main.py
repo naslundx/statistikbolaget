@@ -61,6 +61,8 @@ Och ett datorsystem har genererat svaret:
 Omformulera svaret så att det blir mer människovänligt.
 Ändra inga detaljer, men avrunda siffror eller formatera där det behövs.
 Inkludera enheter på siffror.
+Radbryt mellan punkter i en numrerad lista.
+Lägg inte till ny information.
 
 Svar till användaren:
 """
@@ -71,7 +73,7 @@ def generate_sql(natural_question):
     prompt = f"""
 Du är en SQL-assistent. Omvandla frågan till giltig SQL för en SQLite3-databas. Avsluta med semikolon.
 
-Tabellerna skapades såhär:
+# Tabeller (databas schema)
 
 CREATE TABLE IF NOT EXISTS varugrupp (
     id INTEGER PRIMARY KEY,
@@ -122,13 +124,14 @@ Möjliga varugrupp_detalj: 'Alkoholfritt övrigt', 'Avec', 'Cider & spritdrycker
 Exempel på land: 'Argentina', 'Sverige', 'Frankrike'.
 Exempel på region: 'Alsace', 'Western Australia', 'Gävleborgs län'.
 
-Tänk på att kolumnen namn finns i flera tabeller!
-Använd hellre LIKE och procenttecken än exakt strängmatchning.
-Sök om möjligt helst på varugrupp och i andra hand även varugrupp_detalj.
-Sök bara på innehåll i varans namn om inget annat går eller användaren explicit ber om det.
-All data är från år 2024.
-Du får bara generera SELECT-kommandon och returnera endast SQL.
-Om du inte förstår, returnera "Förstår ej."
+# Regler:
+- Tänk på att kolumnen namn finns i flera tabeller!
+- Använd hellre LIKE och procenttecken än exakt strängmatchning.
+- Sök om möjligt helst på varugrupp och i andra hand även varugrupp_detalj.
+- Sök bara på innehåll i varans namn om inget annat går eller användaren explicit ber om det.
+- All data är från år 2024.
+- Du får bara generera SELECT-kommandon och returnera endast SQL.
+- Om du inte förstår, returnera "Förstår ej."
 
 Fråga: "{natural_question}"
 SQL:
