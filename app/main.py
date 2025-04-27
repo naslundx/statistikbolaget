@@ -13,12 +13,12 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 DB_PATH = "forsaljning.db"
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Start page
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    with open("templates/index.html", encoding="utf-8") as f:
+    with open("app/templates/index.html", encoding="utf-8") as f:
         return f.read()
 
 
