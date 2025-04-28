@@ -9,9 +9,18 @@
     <body
         class="bg-gray-50 text-gray-800 min-h-screen flex flex-col items-center p-6"
     >
-        <img src="static/logo_small.png" alt="Statistikbolaget" />
-
-        <div class="w-full max-w-2xl">
+        <div class="header">
+            <img
+                src="static/logo_small.png"
+                alt="Statistikbolaget"
+                class="m-auto"
+            />
+            <p class="text-center italic text-sm mt-4">
+                Sök enkelt bland all försäljningsstatistik (år 2024),<br />skriv
+                bara en fråga:
+            </p>
+        </div>
+        <div class="w-full max-w-2xl mt-12">
             <form id="queryForm" class="flex gap-2 mb-12">
                 <input
                     id="questionInput"
@@ -44,7 +53,7 @@
         </div>
 
         <div
-            class="object-bottom-right aboutme space-y-6 w-96 bg-teal-50 shadow p-4 m-4 rounded-lg"
+            class="footer object-bottom-right aboutme space-y-6 w-96 bg-teal-50 shadow p-4 m-4 rounded-lg"
         >
             <p>
                 Statistikbolaget använder
@@ -52,7 +61,8 @@
                     href="https://www.omsystembolaget.se/foretagsfakta/systembolaget-i-siffror/forsaljningsstatistik/"
                     >officiell statistik</a
                 >
-                från Systembolaget, men också tjänster från
+                från Systembolaget, men har ingen som helst koppling till
+                företaget. Denna hemsida använder också tjänster från
                 <a href="https://openai.com/">OpenAI</a> för att processa frågor
                 och svar. Resultaten kan vara felaktiga och frågorna kan bli
                 feltolkade.

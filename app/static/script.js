@@ -83,55 +83,31 @@ function renderHistoryItem(entry) {
   container.className = "bg-white shadow p-4 m-4 rounded-lg";
 
   const question = document.createElement("a");
-  question.className = "font-semibold mb-2";
+  question.className = "font-semibold mb-2 hover:text-blue-700";
   question.textContent = `${entry.question}`;
   question.onclick = () => populateEntry(entry.id);
   container.appendChild(question);
 
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "✖";
-  removeBtn.className = "ml-2 text-red-500 hover:text-red-700 text-sm";
+  const removeBtn = document.createElement("a");
+  removeBtn.textContent = "[x]";
+  removeBtn.className = "ml-2 text-red-400 hover:text-red-700 text-sm";
   removeBtn.onclick = () => removeEntry(entry.id);
   container.appendChild(removeBtn);
 
-  /*
-  let { checkbox: sqlCheckbox, label: sqlLabel } =
-    createCheckboxWithLabel("Visa SQL");
-
-  container.appendChild(sqlCheckbox, (checkboxClasses = ["collapsible"]));
-  container.appendChild(sqlLabel);
-
-  const sql = document.createElement("pre");
-  sql.className = "content bg-gray-100 p-2 rounded text-sm overflow-wrap";
-  sql.textContent = entry.sql.trim();
-  */
-
   if (entry.success) {
     const result = document.createElement("div");
-    result.className = "wrap-break-word mb-10";
+    result.className = "wrap-break-word mb-6";
     result.innerHTML = entry.result;
     container.appendChild(result);
+  } else {
+    container.classList.remove("bg-white");
+    container.classList.add("bg-red-100");
+
+    const result = document.createElement("div");
+    result.className = "";
+    result.innerHTML = "Något blev fel, försök igen.";
+    container.appendChild(result);
   }
-
-  /*
-  let { checkbox: rawCheckbox, label: rawLabel } =
-    createCheckboxWithLabel("Visa originaldata");
-
-  container.appendChild(rawLabel);
-  container.appendChild(rawCheckbox, (checkboxClasses = ["collapsible"]));
-
-  const rawResult = document.createElement("div");
-  rawResult.className = "content wrap-break-word";
-  rawResult.innerHTML = entry.raw_result;
-  container.appendChild(rawResult);
-  */
-
-  /*
-  if (!entry.success) {
-    rawResultButton.className = "collapsible bg-red-200 hover:bg-red-300";
-    rawResult.className =
-      "content bg-red-100 p-2 rounded text-sm overflow-wrap";
-  }*/
 
   historyDiv.insertBefore(container, historyDiv.firstChild);
 

@@ -31,11 +31,14 @@
 }
 
 a {
-    color: blue !important;
     cursor: pointer;
 }
 
-a:hover {
+.footer a {
+    color: blue !important;
+}
+
+.footer a:hover {
     color: aqua !important;
 }
 

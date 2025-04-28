@@ -89,39 +89,37 @@ Du är en SQL-assistent. Omvandla frågan till giltig SQL för en postgres-datab
 
 # Tabeller (databas schema)
 
-CREATE TABLE IF NOT EXISTS varugrupp (
+CREATE TABLE varugrupp (
     id INTEGER PRIMARY KEY,
     namn TEXT UNIQUE
 )
 
-CREATE TABLE IF NOT EXISTS varugrupp_detalj (
+CREATE TABLE varugrupp_detalj (
     id INTEGER PRIMARY KEY,
     namn TEXT UNIQUE
 )
 
-CREATE TABLE IF NOT EXISTS land (
+CREATE TABLE land (
     id INTEGER PRIMARY KEY,
     namn TEXT UNIQUE
 )
 
-CREATE TABLE IF NOT EXISTS region (
+CREATE TABLE region (
     id INTEGER PRIMARY KEY,
     namn TEXT UNIQUE
 )
 
-CREATE TABLE IF NOT EXISTS forsaljning (
+CREATE TABLE data (
     artnr TEXT,  -- systembolagets artikelnummer
     varunr TEXT,
     kvittonamn TEXT,
     namn TEXT,
     producentnamn TEXT,
     rubrik TEXT,
-    aktuellt_pris REAL,
+    aktuellt_pris REAL, -- pris per enhet i kronor
     volym_ml REAL, -- volym i milliliter per enhet
     buteljtyp TEXT,
     ursprung TEXT,
-    ekologisk TEXT,
-    etiskt TEXT,
     fors_liter REAL, -- total försäljningsvolym
     artikel_id TEXT,
     varugrupp_id INTEGER,
@@ -146,6 +144,7 @@ Exempel på region: 'Alsace', 'Western Australia', 'Gävleborgs län'.
 - Sök om möjligt helst på varugrupp och i andra hand även varugrupp_detalj.
 - Sök bara på innehåll i varans namn om inget annat går eller användaren explicit ber om det.
 - All data är från år 2024.
+- Använd ILIKE för case insensitivity.
 - Du får bara generera SELECT-kommandon och returnera endast SQL.
 - Om du inte förstår, returnera "Förstår ej."
 
@@ -164,7 +163,7 @@ def run_sql_query(sql: str):
     try:
         cursor = conn.cursor()
         cursor.execute(sql)
-        raw_result = cursor.fetchall()
+        raw_result = cursor.fetchall()[:20]
         return True, raw_result
 
     except Exception as e:
