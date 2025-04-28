@@ -14,6 +14,21 @@ DB_URL = os.getenv("DB_URL")
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+# Store history
+def store_history(success, statement, sql, result):
+    conn = psycopg2.connect(DB_URL)
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO history(success, statement, sql, result) VALUES (%s, %s, %s, %s);", (success, statement, sql, result))
+        conn.commit()
+
+    except Exception as e:
+        pass
+
+    finally:
+        conn.close()
+
 # Start page
 @app.get("/", response_class=HTMLResponse)
 async def index():
@@ -169,11 +184,15 @@ async def query_api(data: UserQuery):
         "question": data.question,
         "sql": sql,
         "raw_result": raw_result,
-        "success": success
+        "success": success,
+        "result": "",
     }
 
     if success:
         result = format_response(question, raw_result)
         content["result"] = result
+        store_history(success, question, sql, result)
+    else:
+        store_history(success, question, sql, "")
 
     return JSONResponse(content=content)
