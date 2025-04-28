@@ -1,6 +1,5 @@
-import sqlite3
+import psycopg2
 import os
-import pandas as pd
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -11,7 +10,7 @@ from pydantic import BaseModel
 # Global settings
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-DB_PATH = "forsaljning.db"
+DB_URL = os.getenv("DB_URL")
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -55,7 +54,7 @@ def format_response(natural_question, answer) -> str:
 En användare har ställt frågan:
     {natural_question}
 
-Och ett datorsystem har genererat svaret:
+Och en query i en Postgres-databas har genererat svaret:
     {answer}
 
 Omformulera svaret så att det blir mer människovänligt.
@@ -71,7 +70,7 @@ Svar till användaren:
 
 def generate_sql(natural_question):
     prompt = f"""
-Du är en SQL-assistent. Omvandla frågan till giltig SQL för en SQLite3-databas. Avsluta med semikolon.
+Du är en SQL-assistent. Omvandla frågan till giltig SQL för en postgres-databas. Avsluta med semikolon.
 
 # Tabeller (databas schema)
 
@@ -106,13 +105,15 @@ CREATE TABLE IF NOT EXISTS forsaljning (
     volym_ml REAL, -- volym i milliliter per enhet
     buteljtyp TEXT,
     ursprung TEXT,
-    ar_ekologisk BOOLEAN,
+    ekologisk TEXT,
+    etiskt TEXT,
     fors_liter REAL, -- total försäljningsvolym
     artikel_id TEXT,
     varugrupp_id INTEGER,
     detalj_id INTEGER,
     land_id INTEGER,
     region_id INTEGER,
+    ar_ekologisk BOOLEAN,
     FOREIGN KEY(varugrupp_id) REFERENCES varugrupp(id),
     FOREIGN KEY(detalj_id) REFERENCES varugrupp_detalj(id),
     FOREIGN KEY(land_id) REFERENCES land(id),
@@ -143,15 +144,20 @@ def run_sql_query(sql: str):
     if not sql or 'SELECT' not in sql:
         return False, ""
 
+    conn = psycopg2.connect(DB_URL)
+
     try:
-        conn = sqlite3.connect(DB_PATH)
-        df = pd.read_sql_query(sql, conn)
-        conn.close()
-        raw_result = df.to_html(index=False)
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        raw_result = cursor.fetchall()
         return True, raw_result
 
     except Exception as e:
         return False, str(e)
+
+    finally:
+        conn.close()
+
 
 @app.post("/query")
 async def query_api(data: UserQuery):

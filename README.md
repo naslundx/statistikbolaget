@@ -12,13 +12,14 @@ Linting: uv run ruff check
 Använd uv run python -m sqlite3 forsaljning.db för att interagera.
 
 TODO:
-- Designa history + error bars
+- Designa error box
+- Specifikt fel om db otillgänglig
 - Max limit på data
-- Formatera output/tabeller bättre
 - Readonly db user
 - Tabell över sökningar + resultat
 
 Framtid:
+- Formatera output/tabeller bättre
 - Använd cache per query?
 - Inkludera data från tidigare år
 - Upvote/Downvote på resultatet
