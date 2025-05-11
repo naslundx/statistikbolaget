@@ -1,8 +1,9 @@
 import psycopg2
 import os
+import uuid
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from pydantic import BaseModel
@@ -14,20 +15,37 @@ DB_URL = os.getenv("DB_URL")
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# Store history
-def store_history(success, statement, sql, result):
+
+def db_insert(command: str, data: tuple):
     conn = psycopg2.connect(DB_URL)
 
     try:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO history(success, statement, sql, result) VALUES (%s, %s, %s, %s);", (success, statement, sql, result))
+        cursor.execute(command, data)
         conn.commit()
 
     except Exception as e:
+        print(e)
         pass
 
     finally:
         conn.close()
+
+
+def store_history(uuid, success, statement, sql, result):
+    db_insert(
+        "INSERT INTO history(uuid, success, statement, sql, result) VALUES (%s, %s, %s, %s, %s);",
+        (uuid, success, statement, sql, result)
+    )
+
+
+def store_vote(_uuid: str, upvote: bool):
+    print('vote', _uuid, upvote)
+    if upvote:
+        db_insert("UPDATE history SET upvote = upvote + 1 WHERE uuid = %s", (_uuid, ))
+    else:
+        db_insert("UPDATE history SET downvote = downvote + 1 WHERE uuid = %s", (_uuid, ))
+
 
 # Start page
 @app.get("/", response_class=HTMLResponse)
@@ -38,6 +56,11 @@ async def index():
 
 class UserQuery(BaseModel):
     question: str
+
+
+class VoteQuery(BaseModel):
+    uuid: uuid.UUID
+    upvote: bool
 
 
 def send_to_openai(prompt) -> str:
@@ -78,9 +101,11 @@ Inkludera enheter på siffror.
 Radbryt mellan punkter i en numrerad lista.
 Lägg inte till ny information.
 
-Svar till användaren:
+Om en tabell passar, inkludera den som html (<table>), inga css eller klasser.
+I så fall, skriv inte samma fakta i plaintext.
 """
     result = send_to_openai(prompt)
+    result = result.replace('`', '').replace('html', '')
     return result
 
 def generate_sql(natural_question):
@@ -140,13 +165,13 @@ Exempel på region: 'Alsace', 'Western Australia', 'Gävleborgs län'.
 
 # Regler:
 - Tänk på att kolumnen namn finns i flera tabeller!
-- Använd hellre LIKE och procenttecken än exakt strängmatchning.
+- Använd hellre ILIKE och procenttecken än exakt strängmatchning. Case insensitivity always!
 - Sök om möjligt helst på varugrupp och i andra hand även varugrupp_detalj.
 - Sök bara på innehåll i varans namn om inget annat går eller användaren explicit ber om det.
-- All data är från år 2024.
-- Använd ILIKE för case insensitivity.
 - Du får bara generera SELECT-kommandon och returnera endast SQL.
 - Om du inte förstår, returnera "Förstår ej."
+- All data är från år 2024.
+- Begränsa (LIMIT) alltid data till max 50 rader (eller mindre om användaren ber om det).
 
 Fråga: "{natural_question}"
 SQL:
@@ -173,11 +198,18 @@ def run_sql_query(sql: str):
         conn.close()
 
 
+@app.post("/vote")
+async def vote_api(data: VoteQuery):
+    store_vote(str(data.uuid), data.upvote)
+    return Response()
+
+
 @app.post("/query")
 async def query_api(data: UserQuery):
     question = data.question[:100]
     sql = generate_sql(question)
     success, raw_result = run_sql_query(sql)
+    _uuid = str(uuid.uuid4())
 
     content = {
         "question": data.question,
@@ -185,13 +217,14 @@ async def query_api(data: UserQuery):
         "raw_result": raw_result,
         "success": success,
         "result": "",
+        "uuid": _uuid,
     }
 
     if success:
         result = format_response(question, raw_result)
         content["result"] = result
-        store_history(success, question, sql, result)
+        store_history(_uuid, success, question, sql, result)
     else:
-        store_history(success, question, sql, "")
+        store_history(_uuid, success, question, sql, "")
 
     return JSONResponse(content=content)

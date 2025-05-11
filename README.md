@@ -5,18 +5,12 @@ Behöver data från systembolaget
 Kör via script.py för att skapa en databas
 
 ## Kör
-uv run uvicorn main:app
+uv run uvicorn app.main:app
 
 Linting: uv run ruff check
 
 Använd uv run python -m sqlite3 forsaljning.db för att interagera.
 
 TODO:
-- Max limit på data
-- Tabell över sökningar + resultat
-
-Framtid:
-- Formatera output/tabeller bättre
-- Använd cache per query?
+- Använd cache från tabellen
 - Inkludera data från tidigare år
-- Upvote/Downvote på resultatet

@@ -39,6 +39,16 @@ form.addEventListener("submit", async (e) => {
   submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
 });
 
+async function postVote(uuid, upvote) {
+  const raw_result = await fetch("/vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uuid, upvote }),
+  });
+  const result = await raw_result.json();
+  console.log(result);
+}
+
 function removeHistoryLoader() {
   document.querySelectorAll(".history-temp").forEach((e) => e.remove());
 }
@@ -80,6 +90,7 @@ function createCheckboxWithLabel(
 
 function renderHistoryItem(entry) {
   const container = document.createElement("div");
+  container.dataset.id = entry.id;
   container.className = "bg-white shadow p-4 m-4 rounded-lg";
 
   const question = document.createElement("a");
@@ -99,6 +110,20 @@ function renderHistoryItem(entry) {
     result.className = "wrap-break-word mb-6";
     result.innerHTML = entry.result;
     container.appendChild(result);
+
+    const votes = document.createElement("div");
+    votes.className = "votes";
+    const upvote = document.createElement("i");
+    upvote.className =
+      entry.vote === "up" ? "fa fa-thumbs-up" : "fa fa-thumbs-o-up";
+    upvote.onclick = () => vote(entry.id, "up");
+    votes.appendChild(upvote);
+    const downvote = document.createElement("i");
+    downvote.className =
+      entry.vote === "down" ? "fa fa-thumbs-down" : "fa fa-thumbs-o-down";
+    downvote.onclick = () => vote(entry.id, "down");
+    votes.appendChild(downvote);
+    container.appendChild(votes);
   } else {
     container.classList.remove("bg-white");
     container.classList.add("bg-red-100");
@@ -126,8 +151,12 @@ function renderExistingHistory() {
   setCollapsibleCallbacks();
 }
 
+function findEntryIndex(id) {
+  return history.findIndex((e) => e.id == id);
+}
+
 function removeEntry(id) {
-  const index = history.findIndex((e) => e.id == id);
+  const index = findEntryIndex(id);
   if (index < 0) {
     return;
   }
@@ -169,4 +198,30 @@ function clearAllHistory() {
   history = [];
   renderExistingHistory();
   clearAllButtonContainer.classList.add("hidden");
+}
+
+function vote(id, what) {
+  let historyElement = history[findEntryIndex(id)];
+
+  const upvote = document.querySelector(`[data-id="${id}"] i:first-child`);
+  const downvote = document.querySelector(`[data-id="${id}"] i:last-child`);
+
+  if (what === historyElement.vote) {
+    return;
+  }
+
+  upvote.className = "fa fa-thumbs-o-up";
+  downvote.className = "fa fa-thumbs-o-down";
+
+  if (what === "up") {
+    upvote.className = "fa fa-thumbs-up";
+    historyElement.vote = "up";
+    postVote(historyElement.uuid, true);
+  } else if (what === "down") {
+    downvote.className = "fa fa-thumbs-down";
+    historyElement.vote = "down";
+    postVote(historyElement.uuid, false);
+  }
+
+  saveHistoryToLocalStorage();
 }

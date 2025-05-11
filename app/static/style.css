@@ -96,3 +96,11 @@ a {
         bottom: 0.1%;
     }
 }
+
+.votes i {
+    padding: 10px;
+}
+
+.votes i:hover {
+    color: cadetblue;
+}
